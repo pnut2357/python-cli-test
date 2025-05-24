@@ -1,8 +1,20 @@
 from setuptools import setup, find_packages
+import os
 
 def read_requirements(filename):
-    with open(filename) as f:
-        return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    try:
+        with open(filename) as f:
+            return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    except FileNotFoundError:
+        # Fallback to hardcoded requirements if requirements.txt is not found
+        return [
+            "click==7.1.2",
+            "numpy>=1.22.4",
+            "pandas==2.2.0",
+            "python-dateutil>=2.8.2",
+            "pytz>=2020.5",
+            "six>=1.15.0"
+        ]
 
 setup(
     name="demo-csv-linter",
