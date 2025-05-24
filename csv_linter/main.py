@@ -35,7 +35,9 @@ def main(filename, show_data):
     df = pd.read_csv(filename)
     
     if show_data:
-        click.echo("\nCSV Data:")
+        click.echo(f"\nCSV Data:")
+        click.echo(f"length of data: {len(df)}")
+        click.echo(f"number of columns: {len(df.columns)}")
         click.echo(df.to_string())
         click.echo("\n")
     
