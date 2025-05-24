@@ -4,7 +4,7 @@ import pandas as pd
 
 def carriage_returns(df):
     for index, row in df.iterrows():
-        for column, field in row.iteritems():
+        for column, field in row.items():
             try:
                 if "\r\n" in field:
                     return index, column, field
@@ -30,8 +30,15 @@ def zero_count_columns(df):
 
 @click.command()
 @click.argument('filename', type=click.Path(exists=True))
-def main(filename):
+@click.option('--show-data', is_flag=True, help='Display the CSV data')
+def main(filename, show_data):
     df = pd.read_csv(filename)
+    
+    if show_data:
+        click.echo("\nCSV Data:")
+        click.echo(df.to_string())
+        click.echo("\n")
+    
     for column in zero_count_columns(df):
         click.echo(f"Warning: Column '{column}' has no items in it")
     unnamed = unnamed_columns(df)
