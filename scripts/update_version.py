@@ -1,5 +1,6 @@
 import re
 import sys
+import subprocess
 from pathlib import Path
 
 def get_current_version():
@@ -10,6 +11,49 @@ def get_current_version():
         if match:
             return match.group(1)
     return None
+
+def run_git_command(command, check=True):
+    try:
+        result = subprocess.run(command, shell=True, check=check, capture_output=True, text=True)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing git command: {e}")
+        if check:
+            sys.exit(1)
+        return None
+
+def has_changes():
+    status = run_git_command("git status --porcelain", check=False)
+    return bool(status.strip())
+
+def create_git_tag(version):
+    tag_name = f"{version}"
+    
+    # Check if tag already exists
+    existing_tags = run_git_command("git tag", check=False)
+    if existing_tags and tag_name in existing_tags.split('\n'):
+        print(f"Tag {tag_name} already exists")
+        return
+    
+    # Stage the setup.py file
+    run_git_command("git add setup.py", check=False)
+    
+    # Check if there are changes to commit
+    if not has_changes():
+        print("No changes to commit")
+        return
+    
+    # Create commit
+    commit_result = run_git_command(f'git commit -m "Bump version to {version}"', check=False)
+    if not commit_result:
+        print("Failed to create commit")
+        return
+    
+    # Create and push tag
+    run_git_command(f"git tag -a {tag_name} -m 'Version {version}'", check=False)
+    run_git_command(f"git push origin {tag_name}", check=False)
+    run_git_command("git push origin HEAD", check=False)
+    print(f"Created and pushed tag {tag_name}")
 
 def update_version(major=None, minor=None):
     current_version = get_current_version()
@@ -45,6 +89,10 @@ def update_version(major=None, minor=None):
         f.write(new_content)
     
     print(f"Updated version to {new_version}")
+    
+    # Create git tag
+    create_git_tag(new_version)
+    
     return new_version
 
 if __name__ == "__main__":
