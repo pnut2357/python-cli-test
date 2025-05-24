@@ -18,7 +18,7 @@ def read_requirements(filename):
 
 setup(
     name="jae-csv-linter",
-    version="0.0.1",
+    version="0.0.4",
     description="demo python CLI tool to lint csv files",
     packages=find_packages(),
     install_requires=read_requirements('requirements.txt'),
